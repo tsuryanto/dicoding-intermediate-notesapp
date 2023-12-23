@@ -1,8 +1,9 @@
 {
 	"info": {
-		"_postman_id": "e070bb0f-4c66-4a60-a118-ccd77798c6cb",
-		"name": "Notes API Test",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+		"_postman_id": "04b0b981-27eb-4403-a9bc-b397f0d47050",
+		"name": "Notes API Test (Dicoding Intermediate)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30668250"
 	},
 	"item": [
 		{
@@ -62,11 +63,100 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:3000/notes",
+					"raw": "{{base_url}}/notes",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "3000",
+					"path": [
+						"notes"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Adding Notes with Bad Note Payload",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('response status code should have 400 value', () => {\r",
+							"   pm.response.to.have.status(400);\r",
+							"}); \r",
+							"\r",
+							"pm.test('response Content-Type header should have application/json value', () => {\r",
+							"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+							"}); \r",
+							"\r",
+							"pm.test('response body should an object', () => {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson).to.be.an('object');\r",
+							"});\r",
+							"\r",
+							"pm.test('response body should have correct property and value', () => {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+							"    pm.expect(responseJson.status).to.equals('fail');\r",
+							"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+							"    pm.expect(responseJson.message).to.be.ok;\r",
+							"});\r",
+							"\r",
+							"const repeatRequestUntilDatasetEmpty = () => {\r",
+							"    const badNotePayloads = pm.environment.get('badNotePayloads');\r",
+							"    if(badNotePayloads && badNotePayloads.length > 0) {\r",
+							"        postman.setNextRequest('Adding Notes with Bad Note Payload');\r",
+							"    }\r",
+							"}\r",
+							"repeatRequestUntilDatasetEmpty();"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							" // ini akan bertipe Array",
+							"let badNotePayloads = pm.environment.get('badNotePayloads');",
+							"",
+							"if (!badNotePayloads || badNotePayloads.length === 0) {",
+							"    // inisialisasi dengan sejumlah note yang tidak sesuai",
+							"    badNotePayloads = [",
+							"        { tags: [\"Android\", \"Web\"], body: \"Isi dari catatan A\" },",
+							"        { title: 1, tags: [\"Android\", \"Web\"], body: \"Isi dari catatan A\" },",
+							"        { title: \"Catatan A\", body: \"Isi dari catatan A\" },",
+							"        { title: \"Catatan A\", tags: [1, \"2\"], body: \"Isi dari catatan A\" },",
+							"        { title: \"Catatan A\", tags: [\"Android\", \"Web\"] },",
+							"        { title: \"Catatan A\", tags: [\"Android\", \"Web\"], body: true }",
+							"    ]",
+							"}",
+							" ",
+							"const currentBadNotePayload = badNotePayloads.shift();  // hapus index 0, geser sisanya",
+							"pm.environment.set('currentBadNotePayload', JSON.stringify(currentBadNotePayload));",
+							"pm.environment.set('badNotePayloads', badNotePayloads);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{currentBadNotePayload}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/notes",
+					"host": [
+						"{{base_url}}"
+					],
 					"path": [
 						"notes"
 					]
@@ -119,11 +209,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:3000/notes",
+					"raw": "{{base_url}}/notes",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "3000",
 					"path": [
 						"notes"
 					]
@@ -195,11 +284,10 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "localhost:3000/notes/{{noteId}}",
+					"raw": "{{base_url}}/notes/{{noteId}}",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "3000",
 					"path": [
 						"notes",
 						"{{noteId}}"
@@ -239,7 +327,9 @@
 							"\r",
 							"pm.test('when request the updated note', () => {\r",
 							"    const noteId = pm.environment.get('noteId');\r",
-							"    pm.sendRequest(`http://localhost:3000/notes/${noteId}`, (error, response) => {\r",
+							"    const baseUrl = pm.environment.get('base_url');\r",
+							"\r",
+							"    pm.sendRequest(`${baseUrl}/notes/${noteId}`, (error, response) => {\r",
 							"        if(!error) {\r",
 							"            pm.test('then the updated note should contain the latest data', () => {\r",
 							"                const responseJson = response.json();\r",
@@ -274,11 +364,100 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:3000/notes/{{noteId}}",
+					"raw": "{{base_url}}/notes/{{noteId}}",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "3000",
+					"path": [
+						"notes",
+						"{{noteId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Note with Bad Note Payload",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('response status code should have 400 value', () => {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							" \r",
+							"pm.test('response Content-Type header should have application/json; charset=utf-8 value', () => {\r",
+							"  pm.expect(pm.response.headers.get('Content-Type')).to.equals('application/json; charset=utf-8');\r",
+							"}); \r",
+							" \r",
+							"pm.test('response body should be an object', () => {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson).to.be.an('object');\r",
+							"});\r",
+							" \r",
+							"pm.test('response body object should have correct property and value', () => {\r",
+							"    const responseJson = pm.response.json();\r",
+							"    pm.expect(responseJson).to.haveOwnProperty('status');\r",
+							"    pm.expect(responseJson.status).to.equals('fail');\r",
+							"    pm.expect(responseJson).to.haveOwnProperty('message');\r",
+							"    pm.expect(responseJson.message).to.be.ok;\r",
+							"});\r",
+							" \r",
+							"const repeatRequestUntilDatasetEmpty = () => {\r",
+							"    const badNotePayloads = pm.environment.get('badNotePayloads');\r",
+							" \r",
+							"    if(badNotePayloads && badNotePayloads.length > 0) {\r",
+							"        postman.setNextRequest('Update Notes with Bad Note Payload');\r",
+							"    }\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let badNotePayloads = pm.environment.get('badNotePayloads');  // ini akan bertipe Array",
+							" ",
+							"if (!badNotePayloads || badNotePayloads.length === 0) {",
+							"    // inisialisasi dengan sejumlah note yang tidak sesuai",
+							"    badNotePayloads = [",
+							"        { tags: [\"Android\", \"Web\"], body: \"Isi dari catatan A\" },",
+							"        { title: 1, tags: [\"Android\", \"Web\"], body: \"Isi dari catatan A\" },",
+							"        { title: \"Catatan A\", body: \"Isi dari catatan A\" },",
+							"        { title: \"Catatan A\", tags: [1, \"2\"], body: \"Isi dari catatan A\" },",
+							"        { title: \"Catatan A\", tags: [\"Android\", \"Web\"] },",
+							"        { title: \"Catatan A\", tags: [\"Android\", \"Web\"], body: true }",
+							"    ]",
+							"}",
+							" ",
+							"const currentBadNotePayload = badNotePayloads.shift();  // hapus index 0, geser sisanya",
+							"pm.environment.set('currentBadNotePayload', JSON.stringify(currentBadNotePayload));",
+							"pm.environment.set('badNotePayloads', badNotePayloads);"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{{currentBadNotePayload}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/notes/{{noteId}}",
+					"host": [
+						"{{base_url}}"
+					],
 					"path": [
 						"notes",
 						"{{noteId}}"
@@ -318,13 +497,14 @@
 							"\r",
 							"pm.test('when request the updated note', () => {\r",
 							"    const noteId = pm.environment.get('noteId');\r",
-							"    pm.sendRequest(`http://localhost:3000/notes/${noteId}`, (error, response) => {\r",
+							"    const baseUrl = pm.environment.get('base_url');\r",
+							"    pm.sendRequest(`${baseUrl}/notes/${noteId}`, (error, response) => {\r",
 							"        if(!error) {\r",
 							"            pm.test('the deleted note should be not found', () => {\r",
-							"                pm.expect(response.code).to.equals(404);\r",
+							"                pm.expect(response.code).to.equals(200);\r",
 							"                const responseJson = response.json();\r",
-							"                pm.expect(responseJson.status).to.equals('fail');\r",
-							"                pm.expect(responseJson.message).to.equals('Catatan tidak ditemukan');\r",
+							"                const { data: { note } } = responseJson;\r",
+							"                pm.expect(note).to.be.undefined;\r",
 							"            });\r",
 							"        }\r",
 							"    });\r",
@@ -338,11 +518,10 @@
 				"method": "DELETE",
 				"header": [],
 				"url": {
-					"raw": "localhost:3000/notes/{{noteId}}",
+					"raw": "{{base_url}}/notes/{{noteId}}",
 					"host": [
-						"localhost"
+						"{{base_url}}"
 					],
-					"port": "3000",
 					"path": [
 						"notes",
 						"{{noteId}}"
